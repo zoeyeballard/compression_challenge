@@ -565,9 +565,14 @@ document.querySelectorAll('#fileName,#footFile').forEach(e=>e.textContent=ST.fil
 $('dvRaw').textContent=ST.distinct_raw; $('dv2').textContent=ST.distinct_raw; $('dvd').textContent=ST.distinct_delta;
 
 // ---- canvas helper (DPR-aware) ----
+// The logical (CSS) height is captured ONCE from the initial height attribute and
+// pinned via style.height. Reading cv.height each call would compound with dpr on
+// every redraw (a hover handler would grow the canvas each mousemove).
 function setup(cv){
   const dpr=Math.min(window.devicePixelRatio||1,2);
-  const cssW=cv.clientWidth||cv.parentNode.clientWidth, cssH=cv.height;
+  let cssH=+cv.dataset.h;
+  if(!cssH){ cssH=cv.height||200; cv.dataset.h=cssH; cv.style.height=cssH+'px'; }
+  const cssW=cv.clientWidth||cv.parentNode.clientWidth;
   cv.width=Math.round(cssW*dpr); cv.height=Math.round(cssH*dpr);
   const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
   return {ctx,w:cssW,h:cssH};
